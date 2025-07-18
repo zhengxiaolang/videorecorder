@@ -1,4 +1,4 @@
-# @cipace/capacitor-video-recorder
+# capacitor-video-recorder
 
 🎥 **A FREE Capacitor 7 alternative to @ionic-enterprise/media-capture**
 

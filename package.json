@@ -12,7 +12,7 @@
     "ios/",
     "CapacitorVideoRecorder.podspec"
   ],
-  "author": "CIPAce Team",
+  "author": "zhengxiaolang",
   "license": "MIT",
   "repository": {
     "type": "git",
