@@ -1,0 +1,1570 @@
+{
+  "api": {
+    "name": "VideoRecorderPlugin",
+    "slug": "videorecorderplugin",
+    "docs": "",
+    "tags": [],
+    "methods": [
+      {
+        "name": "captureVideo",
+        "signature": "(options?: CaptureVideoOptions | undefined) => Promise<CaptureVideoResult>",
+        "parameters": [
+          {
+            "name": "options",
+            "docs": "录制配置选项",
+            "type": "CaptureVideoOptions | undefined"
+          }
+        ],
+        "returns": "Promise<CaptureVideoResult>",
+        "tags": [
+          {
+            "name": "param",
+            "text": "options 录制配置选项"
+          },
+          {
+            "name": "returns",
+            "text": "Promise<CaptureVideoResult>"
+          }
+        ],
+        "docs": "开始视频录制 - 类似于 media-capture 的 captureVideo",
+        "complexTypes": [
+          "CaptureVideoResult",
+          "CaptureVideoOptions"
+        ],
+        "slug": "capturevideo"
+      },
+      {
+        "name": "captureAudio",
+        "signature": "(options?: CaptureAudioOptions | undefined) => Promise<CaptureAudioResult>",
+        "parameters": [
+          {
+            "name": "options",
+            "docs": "录制配置选项",
+            "type": "CaptureAudioOptions | undefined"
+          }
+        ],
+        "returns": "Promise<CaptureAudioResult>",
+        "tags": [
+          {
+            "name": "param",
+            "text": "options 录制配置选项"
+          },
+          {
+            "name": "returns",
+            "text": "Promise<CaptureAudioResult>"
+          }
+        ],
+        "docs": "开始音频录制 - 类似于 media-capture 的 captureAudio",
+        "complexTypes": [
+          "CaptureAudioResult",
+          "CaptureAudioOptions"
+        ],
+        "slug": "captureaudio"
+      },
+      {
+        "name": "openRecordingInterface",
+        "signature": "(options: StartRecordingOptions) => Promise<StopRecordingResult>",
+        "parameters": [
+          {
+            "name": "options",
+            "docs": "录制配置选项",
+            "type": "StartRecordingOptions"
+          }
+        ],
+        "returns": "Promise<StopRecordingResult>",
+        "tags": [
+          {
+            "name": "param",
+            "text": "options 录制配置选项"
+          },
+          {
+            "name": "returns",
+            "text": "Promise<StopRecordingResult> 录制完成后的结果"
+          }
+        ],
+        "docs": "打开视频录制界面 - 扩展功能\r\n注意：此方法会打开原生录制界面，等待用户完成录制操作后才返回最终结果",
+        "complexTypes": [
+          "StopRecordingResult",
+          "StartRecordingOptions"
+        ],
+        "slug": "openrecordinginterface"
+      },
+      {
+        "name": "stopRecording",
+        "signature": "() => Promise<StopRecordingResult>",
+        "parameters": [],
+        "returns": "Promise<StopRecordingResult>",
+        "tags": [
+          {
+            "name": "returns",
+            "text": "Promise<StopRecordingResult>"
+          }
+        ],
+        "docs": "停止当前录制",
+        "complexTypes": [
+          "StopRecordingResult"
+        ],
+        "slug": "stoprecording"
+      },
+      {
+        "name": "pauseRecording",
+        "signature": "() => Promise<void>",
+        "parameters": [],
+        "returns": "Promise<void>",
+        "tags": [
+          {
+            "name": "returns",
+            "text": "Promise<void>"
+          }
+        ],
+        "docs": "暂停视频录制",
+        "complexTypes": [],
+        "slug": "pauserecording"
+      },
+      {
+        "name": "resumeRecording",
+        "signature": "() => Promise<void>",
+        "parameters": [],
+        "returns": "Promise<void>",
+        "tags": [
+          {
+            "name": "returns",
+            "text": "Promise<void>"
+          }
+        ],
+        "docs": "恢复视频录制",
+        "complexTypes": [],
+        "slug": "resumerecording"
+      },
+      {
+        "name": "checkPermissions",
+        "signature": "() => Promise<PermissionStatus>",
+        "parameters": [],
+        "returns": "Promise<PermissionStatus>",
+        "tags": [
+          {
+            "name": "returns",
+            "text": "Promise<PermissionStatus>"
+          }
+        ],
+        "docs": "检查录制权限",
+        "complexTypes": [
+          "PermissionStatus"
+        ],
+        "slug": "checkpermissions"
+      },
+      {
+        "name": "requestPermissions",
+        "signature": "() => Promise<PermissionStatus>",
+        "parameters": [],
+        "returns": "Promise<PermissionStatus>",
+        "tags": [
+          {
+            "name": "returns",
+            "text": "Promise<PermissionStatus>"
+          }
+        ],
+        "docs": "请求录制权限",
+        "complexTypes": [
+          "PermissionStatus"
+        ],
+        "slug": "requestpermissions"
+      },
+      {
+        "name": "getRecordingStatus",
+        "signature": "() => Promise<RecordingStatus>",
+        "parameters": [],
+        "returns": "Promise<RecordingStatus>",
+        "tags": [
+          {
+            "name": "returns",
+            "text": "Promise<RecordingStatus>"
+          }
+        ],
+        "docs": "获取当前录制状态",
+        "complexTypes": [
+          "RecordingStatus"
+        ],
+        "slug": "getrecordingstatus"
+      },
+      {
+        "name": "getSupportedVideoModes",
+        "signature": "() => Promise<ConfigurationData[]>",
+        "parameters": [],
+        "returns": "Promise<ConfigurationData[]>",
+        "tags": [
+          {
+            "name": "returns",
+            "text": "Promise<ConfigurationData[]>"
+          }
+        ],
+        "docs": "获取支持的视频模式 - 类似于 media-capture 的 supportedVideoModes",
+        "complexTypes": [
+          "ConfigurationData"
+        ],
+        "slug": "getsupportedvideomodes"
+      },
+      {
+        "name": "getSupportedAudioModes",
+        "signature": "() => Promise<ConfigurationData[]>",
+        "parameters": [],
+        "returns": "Promise<ConfigurationData[]>",
+        "tags": [
+          {
+            "name": "returns",
+            "text": "Promise<ConfigurationData[]>"
+          }
+        ],
+        "docs": "获取支持的音频模式 - 类似于 media-capture 的 supportedAudioModes",
+        "complexTypes": [
+          "ConfigurationData"
+        ],
+        "slug": "getsupportedaudiomodes"
+      },
+      {
+        "name": "deleteRecording",
+        "signature": "(options: DeleteRecordingOptions) => Promise<void>",
+        "parameters": [
+          {
+            "name": "options",
+            "docs": "删除选项",
+            "type": "DeleteRecordingOptions"
+          }
+        ],
+        "returns": "Promise<void>",
+        "tags": [
+          {
+            "name": "param",
+            "text": "options 删除选项"
+          },
+          {
+            "name": "returns",
+            "text": "Promise<void>"
+          }
+        ],
+        "docs": "删除录制的文件",
+        "complexTypes": [
+          "DeleteRecordingOptions"
+        ],
+        "slug": "deleterecording"
+      }
+    ],
+    "properties": []
+  },
+  "interfaces": [
+    {
+      "name": "CaptureVideoResult",
+      "slug": "capturevideoresult",
+      "docs": "",
+      "tags": [],
+      "methods": [],
+      "properties": [
+        {
+          "name": "files",
+          "tags": [],
+          "docs": "录制的媒体文件数组",
+          "complexTypes": [
+            "MediaFile"
+          ],
+          "type": "MediaFile[]"
+        }
+      ]
+    },
+    {
+      "name": "MediaFile",
+      "slug": "mediafile",
+      "docs": "",
+      "tags": [],
+      "methods": [
+        {
+          "name": "getFormatData",
+          "signature": "() => Promise<MediaFileData>",
+          "parameters": [],
+          "returns": "Promise<MediaFileData>",
+          "tags": [],
+          "docs": "获取格式数据",
+          "complexTypes": [
+            "MediaFileData"
+          ],
+          "slug": "getformatdata"
+        }
+      ],
+      "properties": [
+        {
+          "name": "name",
+          "tags": [],
+          "docs": "文件名（不包含路径）",
+          "complexTypes": [],
+          "type": "string"
+        },
+        {
+          "name": "fullPath",
+          "tags": [],
+          "docs": "文件完整路径",
+          "complexTypes": [],
+          "type": "string"
+        },
+        {
+          "name": "type",
+          "tags": [],
+          "docs": "文件类型 (MIME type)",
+          "complexTypes": [],
+          "type": "string"
+        },
+        {
+          "name": "size",
+          "tags": [],
+          "docs": "文件大小（字节）",
+          "complexTypes": [],
+          "type": "number"
+        },
+        {
+          "name": "lastModifiedDate",
+          "tags": [],
+          "docs": "最后修改日期",
+          "complexTypes": [
+            "Date"
+          ],
+          "type": "Date"
+        }
+      ]
+    },
+    {
+      "name": "MediaFileData",
+      "slug": "mediafiledata",
+      "docs": "",
+      "tags": [],
+      "methods": [],
+      "properties": [
+        {
+          "name": "codecs",
+          "tags": [],
+          "docs": "编解码器信息",
+          "complexTypes": [],
+          "type": "string"
+        },
+        {
+          "name": "bitrate",
+          "tags": [],
+          "docs": "比特率",
+          "complexTypes": [],
+          "type": "number"
+        },
+        {
+          "name": "duration",
+          "tags": [],
+          "docs": "视频/音频时长（秒）",
+          "complexTypes": [],
+          "type": "number"
+        },
+        {
+          "name": "width",
+          "tags": [],
+          "docs": "视频宽度（音频为0）",
+          "complexTypes": [],
+          "type": "number"
+        },
+        {
+          "name": "height",
+          "tags": [],
+          "docs": "视频高度（音频为0）",
+          "complexTypes": [],
+          "type": "number"
+        }
+      ]
+    },
+    {
+      "name": "Date",
+      "slug": "date",
+      "docs": "Enables basic storage and retrieval of dates and times.",
+      "tags": [],
+      "methods": [
+        {
+          "name": "toString",
+          "signature": "() => string",
+          "parameters": [],
+          "returns": "string",
+          "tags": [],
+          "docs": "Returns a string representation of a date. The format of the string depends on the locale.",
+          "complexTypes": [],
+          "slug": "tostring"
+        },
+        {
+          "name": "toDateString",
+          "signature": "() => string",
+          "parameters": [],
+          "returns": "string",
+          "tags": [],
+          "docs": "Returns a date as a string value.",
+          "complexTypes": [],
+          "slug": "todatestring"
+        },
+        {
+          "name": "toTimeString",
+          "signature": "() => string",
+          "parameters": [],
+          "returns": "string",
+          "tags": [],
+          "docs": "Returns a time as a string value.",
+          "complexTypes": [],
+          "slug": "totimestring"
+        },
+        {
+          "name": "toLocaleString",
+          "signature": "() => string",
+          "parameters": [],
+          "returns": "string",
+          "tags": [],
+          "docs": "Returns a value as a string value appropriate to the host environment's current locale.",
+          "complexTypes": [],
+          "slug": "tolocalestring"
+        },
+        {
+          "name": "toLocaleDateString",
+          "signature": "() => string",
+          "parameters": [],
+          "returns": "string",
+          "tags": [],
+          "docs": "Returns a date as a string value appropriate to the host environment's current locale.",
+          "complexTypes": [],
+          "slug": "tolocaledatestring"
+        },
+        {
+          "name": "toLocaleTimeString",
+          "signature": "() => string",
+          "parameters": [],
+          "returns": "string",
+          "tags": [],
+          "docs": "Returns a time as a string value appropriate to the host environment's current locale.",
+          "complexTypes": [],
+          "slug": "tolocaletimestring"
+        },
+        {
+          "name": "valueOf",
+          "signature": "() => number",
+          "parameters": [],
+          "returns": "number",
+          "tags": [],
+          "docs": "Returns the stored time value in milliseconds since midnight, January 1, 1970 UTC.",
+          "complexTypes": [],
+          "slug": "valueof"
+        },
+        {
+          "name": "getTime",
+          "signature": "() => number",
+          "parameters": [],
+          "returns": "number",
+          "tags": [],
+          "docs": "Gets the time value in milliseconds.",
+          "complexTypes": [],
+          "slug": "gettime"
+        },
+        {
+          "name": "getFullYear",
+          "signature": "() => number",
+          "parameters": [],
+          "returns": "number",
+          "tags": [],
+          "docs": "Gets the year, using local time.",
+          "complexTypes": [],
+          "slug": "getfullyear"
+        },
+        {
+          "name": "getUTCFullYear",
+          "signature": "() => number",
+          "parameters": [],
+          "returns": "number",
+          "tags": [],
+          "docs": "Gets the year using Universal Coordinated Time (UTC).",
+          "complexTypes": [],
+          "slug": "getutcfullyear"
+        },
+        {
+          "name": "getMonth",
+          "signature": "() => number",
+          "parameters": [],
+          "returns": "number",
+          "tags": [],
+          "docs": "Gets the month, using local time.",
+          "complexTypes": [],
+          "slug": "getmonth"
+        },
+        {
+          "name": "getUTCMonth",
+          "signature": "() => number",
+          "parameters": [],
+          "returns": "number",
+          "tags": [],
+          "docs": "Gets the month of a Date object using Universal Coordinated Time (UTC).",
+          "complexTypes": [],
+          "slug": "getutcmonth"
+        },
+        {
+          "name": "getDate",
+          "signature": "() => number",
+          "parameters": [],
+          "returns": "number",
+          "tags": [],
+          "docs": "Gets the day-of-the-month, using local time.",
+          "complexTypes": [],
+          "slug": "getdate"
+        },
+        {
+          "name": "getUTCDate",
+          "signature": "() => number",
+          "parameters": [],
+          "returns": "number",
+          "tags": [],
+          "docs": "Gets the day-of-the-month, using Universal Coordinated Time (UTC).",
+          "complexTypes": [],
+          "slug": "getutcdate"
+        },
+        {
+          "name": "getDay",
+          "signature": "() => number",
+          "parameters": [],
+          "returns": "number",
+          "tags": [],
+          "docs": "Gets the day of the week, using local time.",
+          "complexTypes": [],
+          "slug": "getday"
+        },
+        {
+          "name": "getUTCDay",
+          "signature": "() => number",
+          "parameters": [],
+          "returns": "number",
+          "tags": [],
+          "docs": "Gets the day of the week using Universal Coordinated Time (UTC).",
+          "complexTypes": [],
+          "slug": "getutcday"
+        },
+        {
+          "name": "getHours",
+          "signature": "() => number",
+          "parameters": [],
+          "returns": "number",
+          "tags": [],
+          "docs": "Gets the hours in a date, using local time.",
+          "complexTypes": [],
+          "slug": "gethours"
+        },
+        {
+          "name": "getUTCHours",
+          "signature": "() => number",
+          "parameters": [],
+          "returns": "number",
+          "tags": [],
+          "docs": "Gets the hours value in a Date object using Universal Coordinated Time (UTC).",
+          "complexTypes": [],
+          "slug": "getutchours"
+        },
+        {
+          "name": "getMinutes",
+          "signature": "() => number",
+          "parameters": [],
+          "returns": "number",
+          "tags": [],
+          "docs": "Gets the minutes of a Date object, using local time.",
+          "complexTypes": [],
+          "slug": "getminutes"
+        },
+        {
+          "name": "getUTCMinutes",
+          "signature": "() => number",
+          "parameters": [],
+          "returns": "number",
+          "tags": [],
+          "docs": "Gets the minutes of a Date object using Universal Coordinated Time (UTC).",
+          "complexTypes": [],
+          "slug": "getutcminutes"
+        },
+        {
+          "name": "getSeconds",
+          "signature": "() => number",
+          "parameters": [],
+          "returns": "number",
+          "tags": [],
+          "docs": "Gets the seconds of a Date object, using local time.",
+          "complexTypes": [],
+          "slug": "getseconds"
+        },
+        {
+          "name": "getUTCSeconds",
+          "signature": "() => number",
+          "parameters": [],
+          "returns": "number",
+          "tags": [],
+          "docs": "Gets the seconds of a Date object using Universal Coordinated Time (UTC).",
+          "complexTypes": [],
+          "slug": "getutcseconds"
+        },
+        {
+          "name": "getMilliseconds",
+          "signature": "() => number",
+          "parameters": [],
+          "returns": "number",
+          "tags": [],
+          "docs": "Gets the milliseconds of a Date, using local time.",
+          "complexTypes": [],
+          "slug": "getmilliseconds"
+        },
+        {
+          "name": "getUTCMilliseconds",
+          "signature": "() => number",
+          "parameters": [],
+          "returns": "number",
+          "tags": [],
+          "docs": "Gets the milliseconds of a Date object using Universal Coordinated Time (UTC).",
+          "complexTypes": [],
+          "slug": "getutcmilliseconds"
+        },
+        {
+          "name": "getTimezoneOffset",
+          "signature": "() => number",
+          "parameters": [],
+          "returns": "number",
+          "tags": [],
+          "docs": "Gets the difference in minutes between the time on the local computer and Universal Coordinated Time (UTC).",
+          "complexTypes": [],
+          "slug": "gettimezoneoffset"
+        },
+        {
+          "name": "setTime",
+          "signature": "(time: number) => number",
+          "parameters": [
+            {
+              "name": "time",
+              "docs": "A numeric value representing the number of elapsed milliseconds since midnight, January 1, 1970 GMT.",
+              "type": "number"
+            }
+          ],
+          "returns": "number",
+          "tags": [
+            {
+              "name": "param",
+              "text": "time A numeric value representing the number of elapsed milliseconds since midnight, January 1, 1970 GMT."
+            }
+          ],
+          "docs": "Sets the date and time value in the Date object.",
+          "complexTypes": [],
+          "slug": "settime"
+        },
+        {
+          "name": "setMilliseconds",
+          "signature": "(ms: number) => number",
+          "parameters": [
+            {
+              "name": "ms",
+              "docs": "A numeric value equal to the millisecond value.",
+              "type": "number"
+            }
+          ],
+          "returns": "number",
+          "tags": [
+            {
+              "name": "param",
+              "text": "ms A numeric value equal to the millisecond value."
+            }
+          ],
+          "docs": "Sets the milliseconds value in the Date object using local time.",
+          "complexTypes": [],
+          "slug": "setmilliseconds"
+        },
+        {
+          "name": "setUTCMilliseconds",
+          "signature": "(ms: number) => number",
+          "parameters": [
+            {
+              "name": "ms",
+              "docs": "A numeric value equal to the millisecond value.",
+              "type": "number"
+            }
+          ],
+          "returns": "number",
+          "tags": [
+            {
+              "name": "param",
+              "text": "ms A numeric value equal to the millisecond value."
+            }
+          ],
+          "docs": "Sets the milliseconds value in the Date object using Universal Coordinated Time (UTC).",
+          "complexTypes": [],
+          "slug": "setutcmilliseconds"
+        },
+        {
+          "name": "setSeconds",
+          "signature": "(sec: number, ms?: number | undefined) => number",
+          "parameters": [
+            {
+              "name": "sec",
+              "docs": "A numeric value equal to the seconds value.",
+              "type": "number"
+            },
+            {
+              "name": "ms",
+              "docs": "A numeric value equal to the milliseconds value.",
+              "type": "number | undefined"
+            }
+          ],
+          "returns": "number",
+          "tags": [
+            {
+              "name": "param",
+              "text": "sec A numeric value equal to the seconds value."
+            },
+            {
+              "name": "param",
+              "text": "ms A numeric value equal to the milliseconds value."
+            }
+          ],
+          "docs": "Sets the seconds value in the Date object using local time.",
+          "complexTypes": [],
+          "slug": "setseconds"
+        },
+        {
+          "name": "setUTCSeconds",
+          "signature": "(sec: number, ms?: number | undefined) => number",
+          "parameters": [
+            {
+              "name": "sec",
+              "docs": "A numeric value equal to the seconds value.",
+              "type": "number"
+            },
+            {
+              "name": "ms",
+              "docs": "A numeric value equal to the milliseconds value.",
+              "type": "number | undefined"
+            }
+          ],
+          "returns": "number",
+          "tags": [
+            {
+              "name": "param",
+              "text": "sec A numeric value equal to the seconds value."
+            },
+            {
+              "name": "param",
+              "text": "ms A numeric value equal to the milliseconds value."
+            }
+          ],
+          "docs": "Sets the seconds value in the Date object using Universal Coordinated Time (UTC).",
+          "complexTypes": [],
+          "slug": "setutcseconds"
+        },
+        {
+          "name": "setMinutes",
+          "signature": "(min: number, sec?: number | undefined, ms?: number | undefined) => number",
+          "parameters": [
+            {
+              "name": "min",
+              "docs": "A numeric value equal to the minutes value.",
+              "type": "number"
+            },
+            {
+              "name": "sec",
+              "docs": "A numeric value equal to the seconds value.",
+              "type": "number | undefined"
+            },
+            {
+              "name": "ms",
+              "docs": "A numeric value equal to the milliseconds value.",
+              "type": "number | undefined"
+            }
+          ],
+          "returns": "number",
+          "tags": [
+            {
+              "name": "param",
+              "text": "min A numeric value equal to the minutes value."
+            },
+            {
+              "name": "param",
+              "text": "sec A numeric value equal to the seconds value."
+            },
+            {
+              "name": "param",
+              "text": "ms A numeric value equal to the milliseconds value."
+            }
+          ],
+          "docs": "Sets the minutes value in the Date object using local time.",
+          "complexTypes": [],
+          "slug": "setminutes"
+        },
+        {
+          "name": "setUTCMinutes",
+          "signature": "(min: number, sec?: number | undefined, ms?: number | undefined) => number",
+          "parameters": [
+            {
+              "name": "min",
+              "docs": "A numeric value equal to the minutes value.",
+              "type": "number"
+            },
+            {
+              "name": "sec",
+              "docs": "A numeric value equal to the seconds value.",
+              "type": "number | undefined"
+            },
+            {
+              "name": "ms",
+              "docs": "A numeric value equal to the milliseconds value.",
+              "type": "number | undefined"
+            }
+          ],
+          "returns": "number",
+          "tags": [
+            {
+              "name": "param",
+              "text": "min A numeric value equal to the minutes value."
+            },
+            {
+              "name": "param",
+              "text": "sec A numeric value equal to the seconds value."
+            },
+            {
+              "name": "param",
+              "text": "ms A numeric value equal to the milliseconds value."
+            }
+          ],
+          "docs": "Sets the minutes value in the Date object using Universal Coordinated Time (UTC).",
+          "complexTypes": [],
+          "slug": "setutcminutes"
+        },
+        {
+          "name": "setHours",
+          "signature": "(hours: number, min?: number | undefined, sec?: number | undefined, ms?: number | undefined) => number",
+          "parameters": [
+            {
+              "name": "hours",
+              "docs": "A numeric value equal to the hours value.",
+              "type": "number"
+            },
+            {
+              "name": "min",
+              "docs": "A numeric value equal to the minutes value.",
+              "type": "number | undefined"
+            },
+            {
+              "name": "sec",
+              "docs": "A numeric value equal to the seconds value.",
+              "type": "number | undefined"
+            },
+            {
+              "name": "ms",
+              "docs": "A numeric value equal to the milliseconds value.",
+              "type": "number | undefined"
+            }
+          ],
+          "returns": "number",
+          "tags": [
+            {
+              "name": "param",
+              "text": "hours A numeric value equal to the hours value."
+            },
+            {
+              "name": "param",
+              "text": "min A numeric value equal to the minutes value."
+            },
+            {
+              "name": "param",
+              "text": "sec A numeric value equal to the seconds value."
+            },
+            {
+              "name": "param",
+              "text": "ms A numeric value equal to the milliseconds value."
+            }
+          ],
+          "docs": "Sets the hour value in the Date object using local time.",
+          "complexTypes": [],
+          "slug": "sethours"
+        },
+        {
+          "name": "setUTCHours",
+          "signature": "(hours: number, min?: number | undefined, sec?: number | undefined, ms?: number | undefined) => number",
+          "parameters": [
+            {
+              "name": "hours",
+              "docs": "A numeric value equal to the hours value.",
+              "type": "number"
+            },
+            {
+              "name": "min",
+              "docs": "A numeric value equal to the minutes value.",
+              "type": "number | undefined"
+            },
+            {
+              "name": "sec",
+              "docs": "A numeric value equal to the seconds value.",
+              "type": "number | undefined"
+            },
+            {
+              "name": "ms",
+              "docs": "A numeric value equal to the milliseconds value.",
+              "type": "number | undefined"
+            }
+          ],
+          "returns": "number",
+          "tags": [
+            {
+              "name": "param",
+              "text": "hours A numeric value equal to the hours value."
+            },
+            {
+              "name": "param",
+              "text": "min A numeric value equal to the minutes value."
+            },
+            {
+              "name": "param",
+              "text": "sec A numeric value equal to the seconds value."
+            },
+            {
+              "name": "param",
+              "text": "ms A numeric value equal to the milliseconds value."
+            }
+          ],
+          "docs": "Sets the hours value in the Date object using Universal Coordinated Time (UTC).",
+          "complexTypes": [],
+          "slug": "setutchours"
+        },
+        {
+          "name": "setDate",
+          "signature": "(date: number) => number",
+          "parameters": [
+            {
+              "name": "date",
+              "docs": "A numeric value equal to the day of the month.",
+              "type": "number"
+            }
+          ],
+          "returns": "number",
+          "tags": [
+            {
+              "name": "param",
+              "text": "date A numeric value equal to the day of the month."
+            }
+          ],
+          "docs": "Sets the numeric day-of-the-month value of the Date object using local time.",
+          "complexTypes": [],
+          "slug": "setdate"
+        },
+        {
+          "name": "setUTCDate",
+          "signature": "(date: number) => number",
+          "parameters": [
+            {
+              "name": "date",
+              "docs": "A numeric value equal to the day of the month.",
+              "type": "number"
+            }
+          ],
+          "returns": "number",
+          "tags": [
+            {
+              "name": "param",
+              "text": "date A numeric value equal to the day of the month."
+            }
+          ],
+          "docs": "Sets the numeric day of the month in the Date object using Universal Coordinated Time (UTC).",
+          "complexTypes": [],
+          "slug": "setutcdate"
+        },
+        {
+          "name": "setMonth",
+          "signature": "(month: number, date?: number | undefined) => number",
+          "parameters": [
+            {
+              "name": "month",
+              "docs": "A numeric value equal to the month. The value for January is 0, and other month values follow consecutively.",
+              "type": "number"
+            },
+            {
+              "name": "date",
+              "docs": "A numeric value representing the day of the month. If this value is not supplied, the value from a call to the getDate method is used.",
+              "type": "number | undefined"
+            }
+          ],
+          "returns": "number",
+          "tags": [
+            {
+              "name": "param",
+              "text": "month A numeric value equal to the month. The value for January is 0, and other month values follow consecutively."
+            },
+            {
+              "name": "param",
+              "text": "date A numeric value representing the day of the month. If this value is not supplied, the value from a call to the getDate method is used."
+            }
+          ],
+          "docs": "Sets the month value in the Date object using local time.",
+          "complexTypes": [],
+          "slug": "setmonth"
+        },
+        {
+          "name": "setUTCMonth",
+          "signature": "(month: number, date?: number | undefined) => number",
+          "parameters": [
+            {
+              "name": "month",
+              "docs": "A numeric value equal to the month. The value for January is 0, and other month values follow consecutively.",
+              "type": "number"
+            },
+            {
+              "name": "date",
+              "docs": "A numeric value representing the day of the month. If it is not supplied, the value from a call to the getUTCDate method is used.",
+              "type": "number | undefined"
+            }
+          ],
+          "returns": "number",
+          "tags": [
+            {
+              "name": "param",
+              "text": "month A numeric value equal to the month. The value for January is 0, and other month values follow consecutively."
+            },
+            {
+              "name": "param",
+              "text": "date A numeric value representing the day of the month. If it is not supplied, the value from a call to the getUTCDate method is used."
+            }
+          ],
+          "docs": "Sets the month value in the Date object using Universal Coordinated Time (UTC).",
+          "complexTypes": [],
+          "slug": "setutcmonth"
+        },
+        {
+          "name": "setFullYear",
+          "signature": "(year: number, month?: number | undefined, date?: number | undefined) => number",
+          "parameters": [
+            {
+              "name": "year",
+              "docs": "A numeric value for the year.",
+              "type": "number"
+            },
+            {
+              "name": "month",
+              "docs": "A zero-based numeric value for the month (0 for January, 11 for December). Must be specified if numDate is specified.",
+              "type": "number | undefined"
+            },
+            {
+              "name": "date",
+              "docs": "A numeric value equal for the day of the month.",
+              "type": "number | undefined"
+            }
+          ],
+          "returns": "number",
+          "tags": [
+            {
+              "name": "param",
+              "text": "year A numeric value for the year."
+            },
+            {
+              "name": "param",
+              "text": "month A zero-based numeric value for the month (0 for January, 11 for December). Must be specified if numDate is specified."
+            },
+            {
+              "name": "param",
+              "text": "date A numeric value equal for the day of the month."
+            }
+          ],
+          "docs": "Sets the year of the Date object using local time.",
+          "complexTypes": [],
+          "slug": "setfullyear"
+        },
+        {
+          "name": "setUTCFullYear",
+          "signature": "(year: number, month?: number | undefined, date?: number | undefined) => number",
+          "parameters": [
+            {
+              "name": "year",
+              "docs": "A numeric value equal to the year.",
+              "type": "number"
+            },
+            {
+              "name": "month",
+              "docs": "A numeric value equal to the month. The value for January is 0, and other month values follow consecutively. Must be supplied if numDate is supplied.",
+              "type": "number | undefined"
+            },
+            {
+              "name": "date",
+              "docs": "A numeric value equal to the day of the month.",
+              "type": "number | undefined"
+            }
+          ],
+          "returns": "number",
+          "tags": [
+            {
+              "name": "param",
+              "text": "year A numeric value equal to the year."
+            },
+            {
+              "name": "param",
+              "text": "month A numeric value equal to the month. The value for January is 0, and other month values follow consecutively. Must be supplied if numDate is supplied."
+            },
+            {
+              "name": "param",
+              "text": "date A numeric value equal to the day of the month."
+            }
+          ],
+          "docs": "Sets the year value in the Date object using Universal Coordinated Time (UTC).",
+          "complexTypes": [],
+          "slug": "setutcfullyear"
+        },
+        {
+          "name": "toUTCString",
+          "signature": "() => string",
+          "parameters": [],
+          "returns": "string",
+          "tags": [],
+          "docs": "Returns a date converted to a string using Universal Coordinated Time (UTC).",
+          "complexTypes": [],
+          "slug": "toutcstring"
+        },
+        {
+          "name": "toISOString",
+          "signature": "() => string",
+          "parameters": [],
+          "returns": "string",
+          "tags": [],
+          "docs": "Returns a date as a string value in ISO format.",
+          "complexTypes": [],
+          "slug": "toisostring"
+        },
+        {
+          "name": "toJSON",
+          "signature": "(key?: any) => string",
+          "parameters": [
+            {
+              "name": "key",
+              "docs": "",
+              "type": "any"
+            }
+          ],
+          "returns": "string",
+          "tags": [],
+          "docs": "Used by the JSON.stringify method to enable the transformation of an object's data for JavaScript Object Notation (JSON) serialization.",
+          "complexTypes": [],
+          "slug": "tojson"
+        }
+      ],
+      "properties": []
+    },
+    {
+      "name": "CaptureVideoOptions",
+      "slug": "capturevideooptions",
+      "docs": "",
+      "tags": [],
+      "methods": [],
+      "properties": [
+        {
+          "name": "duration",
+          "tags": [],
+          "docs": "最大录制时长（秒）",
+          "complexTypes": [],
+          "type": "number | undefined"
+        },
+        {
+          "name": "limit",
+          "tags": [],
+          "docs": "最大录制文件数量",
+          "complexTypes": [],
+          "type": "number | undefined"
+        },
+        {
+          "name": "quality",
+          "tags": [],
+          "docs": "视频质量 (0-100)",
+          "complexTypes": [],
+          "type": "number | undefined"
+        }
+      ]
+    },
+    {
+      "name": "CaptureAudioResult",
+      "slug": "captureaudioresult",
+      "docs": "",
+      "tags": [],
+      "methods": [],
+      "properties": [
+        {
+          "name": "files",
+          "tags": [],
+          "docs": "录制的媒体文件数组",
+          "complexTypes": [
+            "MediaFile"
+          ],
+          "type": "MediaFile[]"
+        }
+      ]
+    },
+    {
+      "name": "CaptureAudioOptions",
+      "slug": "captureaudiooptions",
+      "docs": "",
+      "tags": [],
+      "methods": [],
+      "properties": [
+        {
+          "name": "duration",
+          "tags": [],
+          "docs": "最大录制时长（秒）",
+          "complexTypes": [],
+          "type": "number | undefined"
+        },
+        {
+          "name": "limit",
+          "tags": [],
+          "docs": "最大录制文件数量",
+          "complexTypes": [],
+          "type": "number | undefined"
+        }
+      ]
+    },
+    {
+      "name": "StopRecordingResult",
+      "slug": "stoprecordingresult",
+      "docs": "",
+      "tags": [],
+      "methods": [
+        {
+          "name": "toMediaFile",
+          "signature": "() => MediaFile",
+          "parameters": [],
+          "returns": "MediaFile",
+          "tags": [],
+          "docs": "转换为 MediaFile 格式",
+          "complexTypes": [
+            "MediaFile"
+          ],
+          "slug": "tomediafile"
+        }
+      ],
+      "properties": [
+        {
+          "name": "recordingId",
+          "tags": [],
+          "docs": "录制会话ID",
+          "complexTypes": [],
+          "type": "string"
+        },
+        {
+          "name": "videoPath",
+          "tags": [],
+          "docs": "视频文件路径",
+          "complexTypes": [],
+          "type": "string"
+        },
+        {
+          "name": "fileSize",
+          "tags": [],
+          "docs": "视频文件大小（字节）",
+          "complexTypes": [],
+          "type": "number"
+        },
+        {
+          "name": "duration",
+          "tags": [],
+          "docs": "录制时长（秒）",
+          "complexTypes": [],
+          "type": "number"
+        },
+        {
+          "name": "width",
+          "tags": [],
+          "docs": "视频宽度",
+          "complexTypes": [],
+          "type": "number"
+        },
+        {
+          "name": "height",
+          "tags": [],
+          "docs": "视频高度",
+          "complexTypes": [],
+          "type": "number"
+        },
+        {
+          "name": "startTime",
+          "tags": [],
+          "docs": "录制开始时间戳",
+          "complexTypes": [],
+          "type": "number"
+        },
+        {
+          "name": "endTime",
+          "tags": [],
+          "docs": "录制结束时间戳",
+          "complexTypes": [],
+          "type": "number"
+        },
+        {
+          "name": "thumbnailPath",
+          "tags": [],
+          "docs": "视频缩略图路径（可选）",
+          "complexTypes": [],
+          "type": "string | undefined"
+        },
+        {
+          "name": "mimeType",
+          "tags": [],
+          "docs": "MIME类型",
+          "complexTypes": [],
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "StartRecordingOptions",
+      "slug": "startrecordingoptions",
+      "docs": "",
+      "tags": [],
+      "methods": [],
+      "properties": [
+        {
+          "name": "quality",
+          "tags": [
+            {
+              "text": "'high'",
+              "name": "default"
+            }
+          ],
+          "docs": "视频质量设置",
+          "complexTypes": [],
+          "type": "'low' | 'medium' | 'high' | 'highest' | undefined"
+        },
+        {
+          "name": "maxDuration",
+          "tags": [
+            {
+              "text": "300 (5分钟)",
+              "name": "default"
+            }
+          ],
+          "docs": "最大录制时长（秒）",
+          "complexTypes": [],
+          "type": "number | undefined"
+        },
+        {
+          "name": "fileNamePrefix",
+          "tags": [
+            {
+              "text": "'video_recording'",
+              "name": "default"
+            }
+          ],
+          "docs": "文件名前缀",
+          "complexTypes": [],
+          "type": "string | undefined"
+        },
+        {
+          "name": "saveToGallery",
+          "tags": [
+            {
+              "text": "false",
+              "name": "default"
+            }
+          ],
+          "docs": "是否保存到相册",
+          "complexTypes": [],
+          "type": "boolean | undefined"
+        },
+        {
+          "name": "camera",
+          "tags": [
+            {
+              "text": "'back'",
+              "name": "default"
+            }
+          ],
+          "docs": "摄像头方向",
+          "complexTypes": [],
+          "type": "'front' | 'back' | undefined"
+        },
+        {
+          "name": "orientation",
+          "tags": [
+            {
+              "text": "'portrait'",
+              "name": "default"
+            }
+          ],
+          "docs": "视频方向",
+          "complexTypes": [],
+          "type": "'portrait' | 'landscape' | undefined"
+        },
+        {
+          "name": "enableAudio",
+          "tags": [
+            {
+              "text": "true",
+              "name": "default"
+            }
+          ],
+          "docs": "是否启用音频录制",
+          "complexTypes": [],
+          "type": "boolean | undefined"
+        },
+        {
+          "name": "customSize",
+          "tags": [],
+          "docs": "自定义视频尺寸",
+          "complexTypes": [],
+          "type": "{ width: number; height: number; } | undefined"
+        }
+      ]
+    },
+    {
+      "name": "PermissionStatus",
+      "slug": "permissionstatus",
+      "docs": "",
+      "tags": [],
+      "methods": [],
+      "properties": [
+        {
+          "name": "camera",
+          "tags": [],
+          "docs": "摄像头权限状态",
+          "complexTypes": [
+            "PermissionState"
+          ],
+          "type": "PermissionState"
+        },
+        {
+          "name": "microphone",
+          "tags": [],
+          "docs": "麦克风权限状态",
+          "complexTypes": [
+            "PermissionState"
+          ],
+          "type": "PermissionState"
+        },
+        {
+          "name": "storage",
+          "tags": [],
+          "docs": "存储权限状态",
+          "complexTypes": [
+            "PermissionState"
+          ],
+          "type": "PermissionState"
+        }
+      ]
+    },
+    {
+      "name": "RecordingStatus",
+      "slug": "recordingstatus",
+      "docs": "",
+      "tags": [],
+      "methods": [],
+      "properties": [
+        {
+          "name": "isRecording",
+          "tags": [],
+          "docs": "是否正在录制",
+          "complexTypes": [],
+          "type": "boolean"
+        },
+        {
+          "name": "isPaused",
+          "tags": [],
+          "docs": "是否暂停",
+          "complexTypes": [],
+          "type": "boolean"
+        },
+        {
+          "name": "currentDuration",
+          "tags": [],
+          "docs": "当前录制时长（秒）",
+          "complexTypes": [],
+          "type": "number"
+        },
+        {
+          "name": "recordingId",
+          "tags": [],
+          "docs": "录制会话ID",
+          "complexTypes": [],
+          "type": "string | undefined"
+        }
+      ]
+    },
+    {
+      "name": "ConfigurationData",
+      "slug": "configurationdata",
+      "docs": "",
+      "tags": [],
+      "methods": [],
+      "properties": [
+        {
+          "name": "type",
+          "tags": [],
+          "docs": "媒体类型",
+          "complexTypes": [],
+          "type": "string"
+        },
+        {
+          "name": "width",
+          "tags": [],
+          "docs": "视频宽度",
+          "complexTypes": [],
+          "type": "number"
+        },
+        {
+          "name": "height",
+          "tags": [],
+          "docs": "视频高度",
+          "complexTypes": [],
+          "type": "number"
+        }
+      ]
+    },
+    {
+      "name": "DeleteRecordingOptions",
+      "slug": "deleterecordingoptions",
+      "docs": "",
+      "tags": [],
+      "methods": [],
+      "properties": [
+        {
+          "name": "videoPath",
+          "tags": [],
+          "docs": "要删除的视频文件路径",
+          "complexTypes": [],
+          "type": "string"
+        },
+        {
+          "name": "deleteThumbnail",
+          "tags": [
+            {
+              "text": "true",
+              "name": "default"
+            }
+          ],
+          "docs": "是否同时删除缩略图",
+          "complexTypes": [],
+          "type": "boolean | undefined"
+        }
+      ]
+    }
+  ],
+  "enums": [],
+  "typeAliases": [
+    {
+      "name": "PermissionState",
+      "slug": "permissionstate",
+      "docs": "",
+      "types": [
+        {
+          "text": "'prompt'",
+          "complexTypes": []
+        },
+        {
+          "text": "'prompt-with-rationale'",
+          "complexTypes": []
+        },
+        {
+          "text": "'granted'",
+          "complexTypes": []
+        },
+        {
+          "text": "'denied'",
+          "complexTypes": []
+        }
+      ]
+    }
+  ],
+  "pluginConfigs": []
+}
