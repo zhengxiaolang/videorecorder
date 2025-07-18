@@ -1,6 +1,6 @@
 {
   "name": "cap-video-recorder",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A free Capacitor 7 plugin for video recording on iOS and Android platforms",
   "main": "dist/plugin.cjs.js",
   "module": "dist/esm/index.js",
@@ -10,7 +10,7 @@
     "android/",
     "dist/",
     "ios/",
-    "CapacitorVideoRecorder.podspec"
+    "CapVideoRecorder.podspec"
   ],
   "author": "zhengxiaolang",
   "license": "MIT",
