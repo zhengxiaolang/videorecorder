@@ -62,18 +62,15 @@ Permissions are automatically added to your manifest:
 <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
 ```
 
-## 🔄 Migration from @ionic-enterprise/media-capture
+## capture
 
 This plugin is designed as a **drop-in replacement**. Simply change your import:
 
 ```typescript
-// Before (Enterprise)
-import { MediaCapture, MediaFile, CaptureVideoOptions } from '@ionic-enterprise/media-capture/ngx';
 
-// After (Free)
-import { MediaCapture, MediaFile, CaptureVideoOptions } from '@cipace/capacitor-video-recorder';
+import { MediaCapture, MediaFile, CaptureVideoOptions } from '@zhengxiaolang/capacitor-video-recorder';
 // or
-import { VideoRecorder as MediaCapture } from '@cipace/capacitor-video-recorder';
+import { VideoRecorder as MediaCapture } from '@zhengxiaolang/capacitor-video-recorder';
 ```
 
 Your existing code will work without changes!
@@ -83,11 +80,9 @@ Your existing code will work without changes!
 ### Basic Video Capture (media-capture compatible)
 
 ```typescript
-import { MediaCapture, CaptureVideoOptions } from '@cipace/capacitor-video-recorder';
+import { MediaCapture, CaptureVideoOptions } from '@zhengxiaolang/capacitor-video-recorder';
 
 const mediaCapture = new MediaCapture();
-
-// Capture video (same API as @ionic-enterprise/media-capture)
 const options: CaptureVideoOptions = {
   limit: 1,
   duration: 30, // 30 seconds max
@@ -117,7 +112,7 @@ try {
 ### Basic Audio Capture
 
 ```typescript
-import { MediaCapture, CaptureAudioOptions } from '@cipace/capacitor-video-recorder';
+import { MediaCapture, CaptureAudioOptions } from '@zhengxiaolang/capacitor-video-recorder';
 
 const mediaCapture = new MediaCapture();
 
@@ -138,7 +133,7 @@ try {
 ### Advanced Video Recording
 
 ```typescript
-import { VideoRecorder, StartRecordingOptions } from '@cipace/capacitor-video-recorder';
+import { VideoRecorder, StartRecordingOptions } from '@zhengxiaolang/capacitor-video-recorder';
 
 // Advanced recording with more control
 const options: StartRecordingOptions = {
