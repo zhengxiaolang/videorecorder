@@ -6,6 +6,10 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
 import com.getcapacitor.JSArray;
 import com.getcapacitor.JSObject;
 import com.getcapacitor.PermissionState;
@@ -18,22 +22,32 @@ import com.getcapacitor.annotation.Permission;
 import com.getcapacitor.annotation.PermissionCallback;
 
 @CapacitorPlugin(
-    name = "VideoRecorder",
+    name = "CipaceVideoRecorder",
     permissions = {
         @Permission(
-            strings = { Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO },
-            alias = VideoRecorderPlugin.CAMERA_MICROPHONE
+            strings = { Manifest.permission.CAMERA },
+            alias = VideoRecorderPlugin.CAMERA
+        ),
+        @Permission(
+            strings = { Manifest.permission.RECORD_AUDIO },
+            alias = VideoRecorderPlugin.MICROPHONE
         ),
         @Permission(
             strings = { Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE },
             alias = VideoRecorderPlugin.STORAGE
+        ),
+        @Permission(
+            strings = { "android.permission.READ_MEDIA_VIDEO" },
+            alias = VideoRecorderPlugin.MEDIA_VIDEO
         )
     }
 )
 public class VideoRecorderPlugin extends Plugin {
     
-    static final String CAMERA_MICROPHONE = "camera_microphone";
+    static final String CAMERA = "camera";
+    static final String MICROPHONE = "microphone";
     static final String STORAGE = "storage";
+    static final String MEDIA_VIDEO = "media_video";
     
     private VideoRecorder videoRecorder;
     
@@ -46,8 +60,8 @@ public class VideoRecorderPlugin extends Plugin {
     
     @PluginMethod
     public void captureVideo(PluginCall call) {
-        if (!hasRequiredPermissions()) {
-            requestAllPermissions(call, "captureVideoWithPermissions");
+        if (!hasFullPermissions()) {
+            requestVideoPermissions(call);
             return;
         }
 
@@ -56,17 +70,16 @@ public class VideoRecorderPlugin extends Plugin {
 
     @PermissionCallback
     private void captureVideoWithPermissions(PluginCall call) {
-        if (!hasRequiredPermissions()) {
-            call.reject("PERMISSION_DENIED", "Camera, microphone, or storage permission denied");
+        if (!hasFullPermissions()) {
+            call.reject("PERMISSION_DENIED", "Camera, microphone and storage permissions are required for video recording");
             return;
         }
 
         VideoRecordingOptions options = createOptionsFromCall(call);
 
-        // 使用 startActivityForResult 来等待录制完成，就像 openRecordingInterface 一样
         Intent intent = new Intent(getContext(), VideoRecordingActivity.class);
         intent.putExtra(VideoRecordingActivity.EXTRA_OPTIONS, options);
-        intent.putExtra(VideoRecordingActivity.EXTRA_IS_CAPTURE_MODE, true); // 标记为 captureVideo 模式
+        intent.putExtra(VideoRecordingActivity.EXTRA_IS_CAPTURE_MODE, true);
 
         startActivityForResult(call, intent, "handleCaptureVideoResult");
     }
@@ -86,7 +99,6 @@ public class VideoRecorderPlugin extends Plugin {
 
         VideoRecorder.StopRecordingResult result = (VideoRecorder.StopRecordingResult) data.getSerializableExtra(VideoRecordingActivity.EXTRA_RESULT);
         if (result != null) {
-            // 转换为 MediaCapture 兼容的格式
             JSObject mediaFile = new JSObject();
             mediaFile.put("name", new File(result.videoPath).getName());
             mediaFile.put("fullPath", result.videoPath);
@@ -107,18 +119,18 @@ public class VideoRecorderPlugin extends Plugin {
     
     @PluginMethod
     public void captureAudio(PluginCall call) {
-        if (!hasRequiredPermissions()) {
-            requestAllPermissions(call, "captureAudioWithPermissions");
+        if (!hasAudioPermissions()) {
+            requestAudioPermission(call);
             return;
         }
-        
+
         captureAudioWithPermissions(call);
     }
     
     @PermissionCallback
     private void captureAudioWithPermissions(PluginCall call) {
-        if (!hasRequiredPermissions()) {
-            call.reject("PERMISSION_DENIED", "Microphone or storage permission denied");
+        if (getPermissionState(Manifest.permission.RECORD_AUDIO) != PermissionState.GRANTED) {
+            call.reject("PERMISSION_DENIED", "Microphone permission denied");
             return;
         }
         
@@ -167,8 +179,8 @@ public class VideoRecorderPlugin extends Plugin {
     
     @PluginMethod
     public void openRecordingInterface(PluginCall call) {
-        if (!hasRequiredPermissions()) {
-            requestAllPermissions(call, "openRecordingInterfaceWithPermissions");
+        if (!hasVideoPermissions()) {
+            requestInterfacePermissions(call);
             return;
         }
 
@@ -177,49 +189,34 @@ public class VideoRecorderPlugin extends Plugin {
     
     @PermissionCallback
     private void openRecordingInterfaceWithPermissions(PluginCall call) {
-        Log.d("VideoRecorderPlugin", "🎬 启动录制界面...");
-
-        if (!hasRequiredPermissions()) {
-            Log.e("VideoRecorderPlugin", "🚫 权限不足，无法启动录制");
-            call.reject("PERMISSION_DENIED", "Camera, microphone, or storage permission denied");
+        if (!hasVideoPermissions()) {
+            call.reject("PERMISSION_DENIED", "Camera or storage permission denied");
             return;
         }
 
         VideoRecordingOptions options = createOptionsFromCall(call);
 
-        // Launch VideoRecordingActivity，等待录制完成
         Intent intent = new Intent(getContext(), VideoRecordingActivity.class);
         intent.putExtra(VideoRecordingActivity.EXTRA_OPTIONS, options);
 
-        Log.d("VideoRecorderPlugin", "📱 启动 VideoRecordingActivity，等待用户操作...");
         startActivityForResult(call, intent, "handleRecordingResult");
     }
 
     @ActivityCallback
     private void handleRecordingResult(PluginCall call, Intent data) {
-        Log.d("VideoRecorderPlugin", "🔄 handleRecordingResult 被调用");
-
         if (data == null) {
-            Log.d("VideoRecorderPlugin", "❌ 用户取消录制，回调到前端");
             call.reject("USER_CANCELLED", "Recording was cancelled");
             return;
         }
 
         VideoRecorderError error = (VideoRecorderError) data.getSerializableExtra(VideoRecordingActivity.EXTRA_ERROR);
         if (error != null) {
-            Log.e("VideoRecorderPlugin", "💥 录制错误: " + error.code + " - " + error.message);
             call.reject(error.code, error.message, error.details);
             return;
         }
 
         VideoRecorder.StopRecordingResult result = (VideoRecorder.StopRecordingResult) data.getSerializableExtra(VideoRecordingActivity.EXTRA_RESULT);
         if (result != null) {
-            Log.d("VideoRecorderPlugin", "✅ 录制成功，准备回调结果到前端");
-            Log.d("VideoRecorderPlugin", "📁 视频路径: " + result.videoPath);
-            Log.d("VideoRecorderPlugin", "⏱️ 录制时长: " + result.duration + "秒");
-            Log.d("VideoRecorderPlugin", "📊 文件大小: " + result.fileSize + "字节");
-
-            // 返回录制完成的最终结果
             JSObject ret = new JSObject();
             ret.put("recordingId", result.recordingId);
             ret.put("videoPath", result.videoPath);
@@ -232,14 +229,11 @@ public class VideoRecorderPlugin extends Plugin {
             ret.put("thumbnailPath", result.thumbnailPath);
             ret.put("mimeType", result.mimeType);
 
-            Log.d("VideoRecorderPlugin", "🚀 调用 call.resolve() 回调到前端");
             call.resolve(ret);
         } else {
-            Log.e("VideoRecorderPlugin", "❓ 未知错误：没有结果数据");
             call.reject("UNKNOWN_ERROR", "Unknown error occurred during recording");
         }
     }
-
 
     
     @PluginMethod
@@ -312,7 +306,7 @@ public class VideoRecorderPlugin extends Plugin {
     
     @PluginMethod
     public void requestPermissions(PluginCall call) {
-        requestAllPermissions(call, "checkPermissions");
+        requestAllPermissions(call);
     }
     
     @PluginMethod
@@ -361,7 +355,6 @@ public class VideoRecorderPlugin extends Plugin {
         options.orientation = call.getString("orientation", "portrait");
         options.enableAudio = call.getBoolean("enableAudio", true);
 
-        // Media Capture compatibility
         Double duration = call.getDouble("duration");
         if (duration != null) {
             options.maxDuration = duration;
@@ -390,25 +383,177 @@ public class VideoRecorderPlugin extends Plugin {
         return mode;
     }
 
-    private boolean hasRequiredPermissions() {
+    @Override
+    public boolean hasRequiredPermissions() {
+        return hasVideoPermissions();
+    }
+
+    private boolean hasVideoPermissions() {
+        return getPermissionState(Manifest.permission.CAMERA) == PermissionState.GRANTED &&
+               hasStoragePermission();
+    }
+
+    private boolean hasAudioPermissions() {
+        return getPermissionState(Manifest.permission.RECORD_AUDIO) == PermissionState.GRANTED &&
+               hasStoragePermission();
+    }
+
+    private boolean hasFullPermissions() {
         return getPermissionState(Manifest.permission.CAMERA) == PermissionState.GRANTED &&
                getPermissionState(Manifest.permission.RECORD_AUDIO) == PermissionState.GRANTED &&
                hasStoragePermission();
     }
 
+    // 请求录像权限（相机+麦克风+存储）
+    private void requestVideoPermissions(PluginCall call) {
+        List<String> aliasesToRequest = new ArrayList<>();
+
+        if (getPermissionState(Manifest.permission.CAMERA) != PermissionState.GRANTED) {
+            aliasesToRequest.add(CAMERA);
+        }
+        if (getPermissionState(Manifest.permission.RECORD_AUDIO) != PermissionState.GRANTED) {
+            aliasesToRequest.add(MICROPHONE);
+        }
+        if (!hasStoragePermission()) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                aliasesToRequest.add(MEDIA_VIDEO);
+            } else {
+                aliasesToRequest.add(STORAGE);
+            }
+        }
+
+        if (!aliasesToRequest.isEmpty()) {
+            String[] aliases = aliasesToRequest.toArray(new String[0]);
+            requestPermissionForAliases(aliases, call, "captureVideoPermissionCallback");
+        } else {
+            captureVideoWithPermissions(call);
+        }
+    }
+
+    // 请求录音权限（麦克风+存储）
+    private void requestAudioPermission(PluginCall call) {
+        List<String> aliasesToRequest = new ArrayList<>();
+
+        if (getPermissionState(Manifest.permission.RECORD_AUDIO) != PermissionState.GRANTED) {
+            aliasesToRequest.add(MICROPHONE);
+        }
+        if (!hasStoragePermission()) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                aliasesToRequest.add(MEDIA_VIDEO);
+            } else {
+                aliasesToRequest.add(STORAGE);
+            }
+        }
+
+        if (!aliasesToRequest.isEmpty()) {
+            String[] aliases = aliasesToRequest.toArray(new String[0]);
+            requestPermissionForAliases(aliases, call, "captureAudioPermissionCallback");
+        } else {
+            captureAudioWithPermissions(call);
+        }
+    }
+
+    // 请求录制界面权限（相机+存储）
+    private void requestInterfacePermissions(PluginCall call) {
+        List<String> aliasesToRequest = new ArrayList<>();
+
+        if (getPermissionState(Manifest.permission.CAMERA) != PermissionState.GRANTED) {
+            aliasesToRequest.add(CAMERA);
+        }
+        if (!hasStoragePermission()) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                aliasesToRequest.add(MEDIA_VIDEO);
+            } else {
+                aliasesToRequest.add(STORAGE);
+            }
+        }
+
+        if (!aliasesToRequest.isEmpty()) {
+            String[] aliases = aliasesToRequest.toArray(new String[0]);
+            requestPermissionForAliases(aliases, call, "openRecordingInterfacePermissionCallback");
+        } else {
+            openRecordingInterfaceWithPermissions(call);
+        }
+    }
+
+    // 请求所有权限（用于 requestPermissions 方法）
+    private void requestAllPermissions(PluginCall call) {
+        List<String> aliasesToRequest = new ArrayList<>();
+
+        if (getPermissionState(Manifest.permission.CAMERA) != PermissionState.GRANTED) {
+            aliasesToRequest.add(CAMERA);
+        }
+        if (getPermissionState(Manifest.permission.RECORD_AUDIO) != PermissionState.GRANTED) {
+            aliasesToRequest.add(MICROPHONE);
+        }
+        if (!hasStoragePermission()) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                aliasesToRequest.add(MEDIA_VIDEO);
+            } else {
+                aliasesToRequest.add(STORAGE);
+            }
+        }
+
+        if (!aliasesToRequest.isEmpty()) {
+            String[] aliases = aliasesToRequest.toArray(new String[0]);
+            requestPermissionForAliases(aliases, call, "requestPermissionsCallback");
+        } else {
+            checkPermissions(call);
+        }
+    }
+
     private boolean hasStoragePermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            return getPermissionState(Manifest.permission.READ_MEDIA_VIDEO) == PermissionState.GRANTED;
+            return getPermissionState("android.permission.READ_MEDIA_VIDEO") == PermissionState.GRANTED;
         } else {
-            return getPermissionState(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PermissionState.GRANTED;
+            return getPermissionState(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PermissionState.GRANTED &&
+                   getPermissionState(Manifest.permission.READ_EXTERNAL_STORAGE) == PermissionState.GRANTED;
         }
     }
 
     private String getStoragePermissionState() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            return getPermissionState(Manifest.permission.READ_MEDIA_VIDEO).toString().toLowerCase();
+            return getPermissionState("android.permission.READ_MEDIA_VIDEO").toString().toLowerCase();
         } else {
-            return getPermissionState(Manifest.permission.WRITE_EXTERNAL_STORAGE).toString().toLowerCase();
+            return getPermissionState(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PermissionState.GRANTED &&
+                   getPermissionState(Manifest.permission.READ_EXTERNAL_STORAGE) == PermissionState.GRANTED
+                   ? "granted" : "denied";
         }
+    }
+
+    // 录像权限回调
+    @PermissionCallback
+    private void captureVideoPermissionCallback(PluginCall call) {
+        if (hasFullPermissions()) {
+            captureVideoWithPermissions(call);
+        } else {
+            call.reject("PERMISSION_DENIED", "Camera, microphone and storage permissions are required for video recording");
+        }
+    }
+
+    // 录音权限回调
+    @PermissionCallback
+    private void captureAudioPermissionCallback(PluginCall call) {
+        if (hasAudioPermissions()) {
+            captureAudioWithPermissions(call);
+        } else {
+            call.reject("PERMISSION_DENIED", "Microphone and storage permissions are required for audio recording");
+        }
+    }
+
+    // 录制界面权限回调
+    @PermissionCallback
+    private void openRecordingInterfacePermissionCallback(PluginCall call) {
+        if (hasVideoPermissions()) {
+            openRecordingInterfaceWithPermissions(call);
+        } else {
+            call.reject("PERMISSION_DENIED", "Camera and storage permissions are required for recording interface");
+        }
+    }
+
+    // 请求权限方法的回调
+    @PermissionCallback
+    private void requestPermissionsCallback(PluginCall call) {
+        checkPermissions(call);
     }
 }
