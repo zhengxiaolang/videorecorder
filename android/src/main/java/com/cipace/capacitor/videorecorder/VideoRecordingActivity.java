@@ -65,12 +65,18 @@ public class VideoRecordingActivity extends Activity implements SurfaceHolder.Ca
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
+
+        // 首先检查权限
+        if (!hasRequiredPermissions()) {
+            requestRequiredPermissions();
+            return;
+        }
+
         // Set fullscreen
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        
+
         // Get options from intent
         options = (VideoRecordingOptions) getIntent().getSerializableExtra(EXTRA_OPTIONS);
         if (options == null) {
@@ -91,8 +97,12 @@ public class VideoRecordingActivity extends Activity implements SurfaceHolder.Ca
         surfaceHolder = surfaceView.getHolder();
         surfaceHolder.addCallback(this);
         surfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
-        mainLayout.addView(surfaceView, new FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+
+        // 初始设置为全屏，稍后会根据预览尺寸调整
+        FrameLayout.LayoutParams surfaceParams = new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        surfaceParams.gravity = Gravity.CENTER;
+        mainLayout.addView(surfaceView, surfaceParams);
         
         // Recording label (initially hidden) - 避开刘海屏幕
         recordingLabel = new TextView(this);
@@ -134,7 +144,7 @@ public class VideoRecordingActivity extends Activity implements SurfaceHolder.Ca
         cancelButton = createCircularButton("✕", Color.parseColor("#757575"));
         FrameLayout.LayoutParams cancelParams = new FrameLayout.LayoutParams(140, 140);
         cancelParams.gravity = Gravity.BOTTOM | Gravity.LEFT;
-        cancelParams.setMargins(100, 0, 0, 100);
+        cancelParams.setMargins(100, 0, 0, 150); // 初始设置更大的底部边距
         cancelButton.setOnClickListener(v -> cancelRecording());
         mainLayout.addView(cancelButton, cancelParams);
 
@@ -143,7 +153,7 @@ public class VideoRecordingActivity extends Activity implements SurfaceHolder.Ca
         recordButton.setTextSize(32);
         FrameLayout.LayoutParams recordParams = new FrameLayout.LayoutParams(160, 160);
         recordParams.gravity = Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL;
-        recordParams.setMargins(0, 0, 0, 80);
+        recordParams.setMargins(0, 0, 0, 150); // 初始设置更大的底部边距
         recordButton.setOnClickListener(v -> startRecording());
         mainLayout.addView(recordButton, recordParams);
 
@@ -152,7 +162,7 @@ public class VideoRecordingActivity extends Activity implements SurfaceHolder.Ca
         stopButton.setTextSize(28);
         FrameLayout.LayoutParams stopParams = new FrameLayout.LayoutParams(160, 160);
         stopParams.gravity = Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL;
-        stopParams.setMargins(0, 0, 0, 80);
+        stopParams.setMargins(0, 0, 0, 150); // 初始设置更大的底部边距
         stopButton.setOnClickListener(v -> stopRecording());
         stopButton.setVisibility(View.GONE);
         mainLayout.addView(stopButton, stopParams);
@@ -162,7 +172,7 @@ public class VideoRecordingActivity extends Activity implements SurfaceHolder.Ca
         switchCameraButton.setTextSize(20);
         FrameLayout.LayoutParams switchParams = new FrameLayout.LayoutParams(140, 140);
         switchParams.gravity = Gravity.BOTTOM | Gravity.RIGHT;
-        switchParams.setMargins(0, 0, 100, 100);
+        switchParams.setMargins(0, 0, 100, 150); // 初始设置更大的底部边距
         switchCameraButton.setOnClickListener(v -> switchCamera());
         mainLayout.addView(switchCameraButton, switchParams);
         
@@ -209,19 +219,40 @@ public class VideoRecordingActivity extends Activity implements SurfaceHolder.Ca
             camera = Camera.open(currentCameraId);
             Camera.Parameters parameters = camera.getParameters();
             
-            // Set camera parameters
-            List<Camera.Size> supportedSizes = parameters.getSupportedPreviewSizes();
-            if (!supportedSizes.isEmpty()) {
-                Camera.Size bestSize = supportedSizes.get(0);
-                parameters.setPreviewSize(bestSize.width, bestSize.height);
+            // Set camera parameters with optimal preview size
+            Camera.Size optimalPreviewSize = getOptimalPreviewSize(parameters);
+            if (optimalPreviewSize != null) {
+                parameters.setPreviewSize(optimalPreviewSize.width, optimalPreviewSize.height);
             }
-            
+
+            // 设置对焦模式以获得更清晰的画面
+            List<String> focusModes = parameters.getSupportedFocusModes();
+            if (focusModes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO)) {
+                parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
+            } else if (focusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
+                parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
+            }
+
+            // 启用视频稳定（如果支持）
+            if (parameters.isVideoStabilizationSupported()) {
+                parameters.setVideoStabilization(true);
+            }
+
+            // 设置场景模式为视频录制
+            List<String> sceneModes = parameters.getSupportedSceneModes();
+            if (sceneModes != null && sceneModes.contains(Camera.Parameters.SCENE_MODE_AUTO)) {
+                parameters.setSceneMode(Camera.Parameters.SCENE_MODE_AUTO);
+            }
+
             camera.setParameters(parameters);
             camera.setDisplayOrientation(90);
-            
+
             if (surfaceHolder != null) {
                 camera.setPreviewDisplay(surfaceHolder);
                 camera.startPreview();
+
+                // 调整 SurfaceView 尺寸以保持正确的宽高比
+                adjustSurfaceViewSize(optimalPreviewSize);
             }
             
         } catch (Exception e) {
@@ -375,17 +406,47 @@ public class VideoRecordingActivity extends Activity implements SurfaceHolder.Ca
 
     private CamcorderProfile getQualityProfile() {
         String quality = options.quality != null ? options.quality : "high";
+        int cameraId = currentCameraId;
 
         switch (quality.toLowerCase()) {
             case "low":
-                return CamcorderProfile.get(CamcorderProfile.QUALITY_LOW);
+                if (CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_480P)) {
+                    return CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_480P);
+                }
+                return CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_LOW);
+
             case "medium":
-                return CamcorderProfile.get(CamcorderProfile.QUALITY_480P);
+                if (CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_720P)) {
+                    return CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_720P);
+                }
+                return CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_480P);
+
             case "highest":
-                return CamcorderProfile.get(CamcorderProfile.QUALITY_1080P);
+                // 尝试最高质量：4K -> 1080P -> 720P
+                if (CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_2160P)) {
+                    CamcorderProfile profile = CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_2160P);
+                    // 提高比特率以获得更好质量
+                    profile.videoBitRate = Math.max(profile.videoBitRate, 20000000); // 20Mbps
+                    return profile;
+                }
+                if (CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_1080P)) {
+                    CamcorderProfile profile = CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_1080P);
+                    // 提高比特率以获得更好质量
+                    profile.videoBitRate = Math.max(profile.videoBitRate, 12000000); // 12Mbps
+                    return profile;
+                }
+                return CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_720P);
+
             case "high":
             default:
-                return CamcorderProfile.get(CamcorderProfile.QUALITY_720P);
+                // 默认使用 1080P，如果不支持则降级到 720P
+                if (CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_1080P)) {
+                    CamcorderProfile profile = CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_1080P);
+                    // 适中的比特率
+                    profile.videoBitRate = Math.max(profile.videoBitRate, 8000000); // 8Mbps
+                    return profile;
+                }
+                return CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_720P);
         }
     }
 
@@ -493,7 +554,15 @@ public class VideoRecordingActivity extends Activity implements SurfaceHolder.Ca
     
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-        // Handle surface changes if needed
+        // Surface 尺寸变化时，延迟调整按钮位置
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            if (surfaceView != null) {
+                FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) surfaceView.getLayoutParams();
+                if (params != null) {
+                    adjustButtonPositions(params.height);
+                }
+            }
+        }, 100); // 延迟 100ms 确保布局完成
     }
     
     @Override
@@ -519,6 +588,194 @@ public class VideoRecordingActivity extends Activity implements SurfaceHolder.Ca
         }
         if (durationHandler != null && durationRunnable != null) {
             durationHandler.removeCallbacks(durationRunnable);
+        }
+    }
+
+    // 权限处理方法
+    private boolean hasRequiredPermissions() {
+        return checkSelfPermission(android.Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED &&
+               checkSelfPermission(android.Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private void requestRequiredPermissions() {
+        String[] permissions = {
+            android.Manifest.permission.CAMERA,
+            android.Manifest.permission.RECORD_AUDIO
+        };
+        requestPermissions(permissions, 1001);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == 1001) {
+            boolean allGranted = true;
+            for (int result : grantResults) {
+                if (result != PackageManager.PERMISSION_GRANTED) {
+                    allGranted = false;
+                    break;
+                }
+            }
+
+            if (allGranted) {
+                // 权限授予后重新创建 Activity
+                recreate();
+            } else {
+                finishWithError("PERMISSION_DENIED", "Camera and microphone permissions are required");
+            }
+        }
+    }
+
+    // 获取最优预览尺寸，避免画面变形
+    private Camera.Size getOptimalPreviewSize(Camera.Parameters parameters) {
+        List<Camera.Size> supportedPreviewSizes = parameters.getSupportedPreviewSizes();
+        List<Camera.Size> supportedVideoSizes = parameters.getSupportedVideoSizes();
+
+        if (supportedPreviewSizes == null || supportedPreviewSizes.isEmpty()) {
+            return null;
+        }
+
+        // 获取录制质量对应的尺寸
+        CamcorderProfile profile = getQualityProfile();
+        int targetWidth = profile.videoFrameWidth;
+        int targetHeight = profile.videoFrameHeight;
+        double targetRatio = (double) targetWidth / targetHeight;
+
+        // 获取屏幕尺寸作为参考
+        android.util.DisplayMetrics displayMetrics = new android.util.DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        int screenWidth = displayMetrics.widthPixels;
+        int screenHeight = displayMetrics.heightPixels;
+
+        Camera.Size optimalSize = null;
+        double minDiff = Double.MAX_VALUE;
+
+        // 首先尝试找到与录制尺寸比例匹配的预览尺寸
+        for (Camera.Size size : supportedPreviewSizes) {
+            double ratio = (double) size.width / size.height;
+            double ratioDiff = Math.abs(ratio - targetRatio);
+
+            // 如果比例接近且尺寸合适
+            if (ratioDiff < 0.1) {
+                double sizeDiff = Math.abs(size.height - targetHeight);
+                if (sizeDiff < minDiff) {
+                    optimalSize = size;
+                    minDiff = sizeDiff;
+                }
+            }
+        }
+
+        // 如果没找到合适的比例，选择最接近录制尺寸的
+        if (optimalSize == null) {
+            minDiff = Double.MAX_VALUE;
+            for (Camera.Size size : supportedPreviewSizes) {
+                double sizeDiff = Math.abs(size.width - targetWidth) + Math.abs(size.height - targetHeight);
+                if (sizeDiff < minDiff) {
+                    optimalSize = size;
+                    minDiff = sizeDiff;
+                }
+            }
+        }
+
+        // 确保选择的尺寸不会太大（避免性能问题）
+        if (optimalSize != null && optimalSize.width * optimalSize.height > 1920 * 1080) {
+            for (Camera.Size size : supportedPreviewSizes) {
+                if (size.width <= 1920 && size.height <= 1080) {
+                    double ratio = (double) size.width / size.height;
+                    if (Math.abs(ratio - targetRatio) < 0.1) {
+                        optimalSize = size;
+                        break;
+                    }
+                }
+            }
+        }
+
+        return optimalSize != null ? optimalSize : supportedPreviewSizes.get(0);
+    }
+
+    // 调整 SurfaceView 尺寸以避免画面变形
+    private void adjustSurfaceViewSize(Camera.Size previewSize) {
+        if (previewSize == null || surfaceView == null) {
+            return;
+        }
+
+        // 获取屏幕尺寸
+        android.util.DisplayMetrics displayMetrics = new android.util.DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        int screenWidth = displayMetrics.widthPixels;
+        int screenHeight = displayMetrics.heightPixels;
+
+        // 由于相机旋转了90度，需要交换宽高
+        int previewWidth = previewSize.height;  // 旋转后的宽度
+        int previewHeight = previewSize.width;  // 旋转后的高度
+
+        // 计算预览的宽高比
+        double previewRatio = (double) previewWidth / previewHeight;
+        double screenRatio = (double) screenWidth / screenHeight;
+
+        int surfaceWidth, surfaceHeight;
+
+        if (previewRatio > screenRatio) {
+            // 预览更宽，以屏幕宽度为准
+            surfaceWidth = screenWidth;
+            surfaceHeight = (int) (screenWidth / previewRatio);
+        } else {
+            // 预览更高，以屏幕高度为准
+            surfaceHeight = screenHeight;
+            surfaceWidth = (int) (screenHeight * previewRatio);
+        }
+
+        // 更新 SurfaceView 的布局参数
+        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(surfaceWidth, surfaceHeight);
+        params.gravity = Gravity.CENTER;
+
+        runOnUiThread(() -> {
+            surfaceView.setLayoutParams(params);
+            // 调整 SurfaceView 尺寸后，重新定位按钮
+            adjustButtonPositions(surfaceHeight);
+        });
+    }
+
+    // 根据 SurfaceView 的实际高度调整按钮位置
+    private void adjustButtonPositions(int surfaceHeight) {
+        // 获取屏幕高度
+        android.util.DisplayMetrics displayMetrics = new android.util.DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        int screenHeight = displayMetrics.heightPixels;
+
+        // 计算 SurfaceView 底部到屏幕底部的距离
+        int surfaceBottomMargin = (screenHeight - surfaceHeight) / 2;
+
+        // 确保按钮在 SurfaceView 区域内，距离底部 80dp
+        int buttonBottomMargin = Math.max(80, surfaceBottomMargin + 80);
+
+        // 更新录制按钮位置
+        if (recordButton != null) {
+            FrameLayout.LayoutParams recordParams = (FrameLayout.LayoutParams) recordButton.getLayoutParams();
+            recordParams.setMargins(0, 0, 0, buttonBottomMargin);
+            recordButton.setLayoutParams(recordParams);
+        }
+
+        // 更新停止按钮位置
+        if (stopButton != null) {
+            FrameLayout.LayoutParams stopParams = (FrameLayout.LayoutParams) stopButton.getLayoutParams();
+            stopParams.setMargins(0, 0, 0, buttonBottomMargin);
+            stopButton.setLayoutParams(stopParams);
+        }
+
+        // 更新取消按钮位置（左下角）
+        if (cancelButton != null) {
+            FrameLayout.LayoutParams cancelParams = (FrameLayout.LayoutParams) cancelButton.getLayoutParams();
+            cancelParams.setMargins(100, 0, 0, buttonBottomMargin);
+            cancelButton.setLayoutParams(cancelParams);
+        }
+
+        // 更新切换相机按钮位置（右下角）
+        if (switchCameraButton != null) {
+            FrameLayout.LayoutParams switchParams = (FrameLayout.LayoutParams) switchCameraButton.getLayoutParams();
+            switchParams.setMargins(0, 0, 100, buttonBottomMargin);
+            switchCameraButton.setLayoutParams(switchParams);
         }
     }
 }
