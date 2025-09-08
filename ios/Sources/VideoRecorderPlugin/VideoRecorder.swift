@@ -661,7 +661,13 @@ extension VideoRecorder: AVCaptureFileOutputRecordingDelegate {
 
         // 生成缩略图
         let thumbnailResult = VideoRecorder.generateThumbnail(from: outputFileURL, timeAt: 1.0, quality: 0.8)
-        let thumbnailPath = thumbnailResult.success ? thumbnailResult.value : nil
+        let thumbnailPath: String?
+        switch thumbnailResult {
+        case .success(let path):
+            thumbnailPath = path
+        case .failure:
+            thumbnailPath = nil
+        }
 
         let result = StopRecordingResult(
             recordingId: recordingId,
