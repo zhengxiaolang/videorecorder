@@ -346,8 +346,9 @@ public class VideoRecorder: NSObject {
             let cgImage = try imageGenerator.copyCGImage(at: time, actualTime: nil)
             let image = UIImage(cgImage: cgImage)
 
-            // 生成缩略图文件名
-            let thumbnailFileName = videoURL.lastPathComponent.replacingOccurrences(of: ".mp4", with: "_thumbnail_\(Int(actualTimeAt))s.jpg")
+            // 生成缩略图文件名（兼容任意扩展名，例如 .mp4 / .mov / .m4v 等）
+            let baseName = videoURL.deletingPathExtension().lastPathComponent
+            let thumbnailFileName = "\(baseName)_thumbnail_\(Int(actualTimeAt))s.jpg"
             let thumbnailURL = videoURL.deletingLastPathComponent().appendingPathComponent(thumbnailFileName)
 
             // 保存缩略图
