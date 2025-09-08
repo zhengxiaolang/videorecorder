@@ -371,6 +371,32 @@ public class VideoRecordingActivity extends Activity implements SurfaceHolder.Ca
                 File file = new File(outputFilePath);
                 long fileSize = file.length();
 
+                // 生成缩略图
+                String thumbnailPath = null;
+                try {
+                    android.media.MediaMetadataRetriever retriever = new android.media.MediaMetadataRetriever();
+                    retriever.setDataSource(outputFilePath);
+                    
+                    // 在第1秒生成缩略图
+                    android.graphics.Bitmap bitmap = retriever.getFrameAtTime(1000000, android.media.MediaMetadataRetriever.OPTION_CLOSEST_SYNC);
+                    retriever.release();
+                    
+                    if (bitmap != null) {
+                        String thumbnailFileName = new File(outputFilePath).getName().replace(".mp4", "_thumbnail.jpg");
+                        File thumbnailFile = new File(new File(outputFilePath).getParent(), thumbnailFileName);
+                        
+                        java.io.FileOutputStream out = new java.io.FileOutputStream(thumbnailFile);
+                        bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 80, out);
+                        out.flush();
+                        out.close();
+                        bitmap.recycle();
+                        
+                        thumbnailPath = thumbnailFile.getAbsolutePath();
+                    }
+                } catch (Exception e) {
+                    Log.e(TAG, "Failed to generate thumbnail", e);
+                }
+
                 VideoRecorder.StopRecordingResult result = new VideoRecorder.StopRecordingResult(
                     "recording_" + recordingStartTime,
                     outputFilePath,
@@ -380,7 +406,7 @@ public class VideoRecordingActivity extends Activity implements SurfaceHolder.Ca
                     1080, // Default height - should get from actual recording
                     recordingStartTime,
                     endTime,
-                    null, // No thumbnail for now
+                    thumbnailPath,
                     "video/mp4"
                 );
 

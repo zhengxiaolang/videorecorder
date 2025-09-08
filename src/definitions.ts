@@ -75,6 +75,13 @@ export interface VideoRecorderPlugin {
    * @returns Promise<void>
    */
   deleteRecording(options: DeleteRecordingOptions): Promise<void>;
+
+  /**
+   * 生成视频缩略图
+   * @param options 缩略图生成选项
+   * @returns Promise<ThumbnailResult>
+   */
+  generateThumbnail(options: GenerateThumbnailOptions): Promise<ThumbnailResult>;
 }
 
 // 兼容 media-capture 的接口
@@ -381,6 +388,47 @@ export interface DeleteRecordingOptions {
   deleteThumbnail?: boolean;
 }
 
+export interface GenerateThumbnailOptions {
+  /**
+   * 视频文件路径
+   */
+  videoPath: string;
+
+  /**
+   * 生成缩略图的时间点（秒）
+   * @default 1.0
+   */
+  timeAt?: number;
+
+  /**
+   * 缩略图质量 (0.0 - 1.0)
+   * @default 0.8
+   */
+  quality?: number;
+}
+
+export interface ThumbnailResult {
+  /**
+   * 生成的缩略图文件路径
+   */
+  thumbnailPath: string;
+
+  /**
+   * 原始视频文件路径
+   */
+  videoPath: string;
+
+  /**
+   * 生成缩略图的时间点（秒）
+   */
+  timeAt: number;
+
+  /**
+   * 缩略图质量
+   */
+  quality: number;
+}
+
 
 
 export interface CaptureError {
@@ -412,4 +460,5 @@ export const VideoRecorderErrorCodes = {
   CAMERA_ERROR: 'CAMERA_ERROR',
   MICROPHONE_ERROR: 'MICROPHONE_ERROR',
   CAPTURE_CANCELLED: 'CAPTURE_CANCELLED',
+  THUMBNAIL_GENERATION_FAILED: 'THUMBNAIL_GENERATION_FAILED',
 } as const;

@@ -329,6 +329,38 @@ public class VideoRecorder: NSObject {
 
         completion(.success(()))
     }
+    
+    public static func generateThumbnail(from videoURL: URL, timeAt: Double = 1.0, quality: Double = 0.8) -> Result<String, VideoRecorderError> {
+        let asset = AVAsset(url: videoURL)
+        let imageGenerator = AVAssetImageGenerator(asset: asset)
+        imageGenerator.appliesPreferredTrackTransform = true
+        imageGenerator.requestedTimeToleranceAfter = CMTime.zero
+        imageGenerator.requestedTimeToleranceBefore = CMTime.zero
+
+        // 确保时间点不超过视频时长
+        let duration = CMTimeGetSeconds(asset.duration)
+        let actualTimeAt = min(max(timeAt, 0), duration - 0.1) // 确保不超出视频时长
+        let time = CMTime(seconds: actualTimeAt, preferredTimescale: 60)
+
+        do {
+            let cgImage = try imageGenerator.copyCGImage(at: time, actualTime: nil)
+            let image = UIImage(cgImage: cgImage)
+
+            // 生成缩略图文件名
+            let thumbnailFileName = videoURL.lastPathComponent.replacingOccurrences(of: ".mp4", with: "_thumbnail_\(Int(actualTimeAt))s.jpg")
+            let thumbnailURL = videoURL.deletingLastPathComponent().appendingPathComponent(thumbnailFileName)
+
+            // 保存缩略图
+            if let imageData = image.jpegData(compressionQuality: CGFloat(quality)) {
+                try imageData.write(to: thumbnailURL)
+                return .success(thumbnailURL.path)
+            } else {
+                return .failure(VideoRecorderError(code: "THUMBNAIL_GENERATION_FAILED", message: "Failed to convert image to JPEG data"))
+            }
+        } catch {
+            return .failure(VideoRecorderError(code: "THUMBNAIL_GENERATION_FAILED", message: "Failed to generate thumbnail: \(error.localizedDescription)"))
+        }
+    }
 
     // MARK: - Private Methods
 
@@ -556,30 +588,6 @@ public class VideoRecorder: NSObject {
         return "recording_\(Int(Date().timeIntervalSince1970))_\(UUID().uuidString.prefix(8))"
     }
 
-    private func generateThumbnail(from videoURL: URL) -> String? {
-        let asset = AVAsset(url: videoURL)
-        let imageGenerator = AVAssetImageGenerator(asset: asset)
-        imageGenerator.appliesPreferredTrackTransform = true
-
-        let time = CMTime(seconds: 1, preferredTimescale: 60)
-
-        do {
-            let cgImage = try imageGenerator.copyCGImage(at: time, actualTime: nil)
-            let image = UIImage(cgImage: cgImage)
-
-            let thumbnailFileName = videoURL.lastPathComponent.replacingOccurrences(of: ".mp4", with: "_thumbnail.jpg")
-            let thumbnailURL = videoURL.deletingLastPathComponent().appendingPathComponent(thumbnailFileName)
-
-            if let imageData = image.jpegData(compressionQuality: 0.8) {
-                try imageData.write(to: thumbnailURL)
-                return thumbnailURL.path
-            }
-        } catch {
-            print("Failed to generate thumbnail: \(error)")
-        }
-
-        return nil
-    }
 
     private func saveToPhotoLibrary(videoURL: URL, completion: @escaping (Bool) -> Void) {
         PHPhotoLibrary.requestAuthorization { status in
@@ -652,7 +660,8 @@ extension VideoRecorder: AVCaptureFileOutputRecordingDelegate {
         }
 
         // 生成缩略图
-        let thumbnailPath = generateThumbnail(from: outputFileURL)
+        let thumbnailResult = VideoRecorder.generateThumbnail(from: outputFileURL, timeAt: 1.0, quality: 0.8)
+        let thumbnailPath = thumbnailResult.success ? thumbnailResult.value : nil
 
         let result = StopRecordingResult(
             recordingId: recordingId,

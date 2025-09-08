@@ -23,7 +23,10 @@ public class VideoRecorderPlugin: CAPPlugin, CAPBridgedPlugin {
         CAPPluginMethod(name: "checkPermissions", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "requestPermissions", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "getRecordingStatus", returnType: CAPPluginReturnPromise),
-        CAPPluginMethod(name: "deleteRecording", returnType: CAPPluginReturnPromise)
+        CAPPluginMethod(name: "deleteRecording", returnType: CAPPluginReturnPromise),
+        
+        // 缩略图生成方法
+        CAPPluginMethod(name: "generateThumbnail", returnType: CAPPluginReturnPromise)
     ]
     
     private var videoRecorder: VideoRecorder?
@@ -333,6 +336,50 @@ public class VideoRecorderPlugin: CAPPlugin, CAPBridgedPlugin {
                 switch result {
                 case .success:
                     call.resolve()
+                case .failure(let error):
+                    call.reject(error.code, error.message, nil, error.details)
+                }
+            }
+        }
+    }
+    
+    @objc func generateThumbnail(_ call: CAPPluginCall) {
+        guard let videoPath = call.getString("videoPath") else {
+            call.reject("INVALID_OPTIONS", "videoPath is required")
+            return
+        }
+        
+        let timeAt = call.getDouble("timeAt") ?? 1.0 // 默认在第1秒生成缩略图
+        let quality = call.getDouble("quality") ?? 0.8 // 默认压缩质量0.8
+        
+        // 处理路径兼容性：支持 file:// 开头的路径
+        let actualVideoPath: String
+        if videoPath.hasPrefix("file://") {
+            actualVideoPath = String(videoPath.dropFirst(7)) // 移除 "file://" 前缀
+        } else {
+            actualVideoPath = videoPath
+        }
+        
+        // 验证视频文件是否存在
+        let videoURL = URL(fileURLWithPath: actualVideoPath)
+        guard FileManager.default.fileExists(atPath: actualVideoPath) else {
+            call.reject("FILE_NOT_FOUND", "Video file not found at path: \(actualVideoPath)")
+            return
+        }
+        
+        // 在后台线程生成缩略图
+        DispatchQueue.global(qos: .userInitiated).async {
+            let result = VideoRecorder.generateThumbnail(from: videoURL, timeAt: timeAt, quality: quality)
+            
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let thumbnailPath):
+                    call.resolve([
+                        "thumbnailPath": thumbnailPath,
+                        "videoPath": actualVideoPath,
+                        "timeAt": timeAt,
+                        "quality": quality
+                    ])
                 case .failure(let error):
                     call.reject(error.code, error.message, nil, error.details)
                 }

@@ -345,6 +345,53 @@ public class VideoRecorderPlugin extends Plugin {
             }
         });
     }
+    
+    @PluginMethod
+    public void generateThumbnail(PluginCall call) {
+        String videoPath = call.getString("videoPath");
+        double timeAt = call.getDouble("timeAt", 1.0); // 默认在第1秒生成缩略图
+        double quality = call.getDouble("quality", 0.8); // 默认压缩质量0.8
+        
+        if (videoPath == null) {
+            call.reject("INVALID_OPTIONS", "videoPath is required");
+            return;
+        }
+        
+        // 处理路径兼容性：支持 file:// 开头的路径
+        String actualVideoPath;
+        if (videoPath.startsWith("file://")) {
+            actualVideoPath = videoPath.substring(7); // 移除 "file://" 前缀
+        } else {
+            actualVideoPath = videoPath;
+        }
+        
+        // 验证视频文件是否存在
+        java.io.File videoFile = new java.io.File(actualVideoPath);
+        if (!videoFile.exists()) {
+            call.reject("FILE_NOT_FOUND", "Video file not found at path: " + actualVideoPath);
+            return;
+        }
+        
+        VideoRecorder.generateThumbnail(actualVideoPath, timeAt, quality, new VideoRecorder.RecordingCallback() {
+            @Override
+            public void onSuccess(Object result) {
+                if (result instanceof VideoRecorder.ThumbnailResult) {
+                    VideoRecorder.ThumbnailResult thumbnailResult = (VideoRecorder.ThumbnailResult) result;
+                    JSObject ret = new JSObject();
+                    ret.put("thumbnailPath", thumbnailResult.thumbnailPath);
+                    ret.put("videoPath", actualVideoPath);
+                    ret.put("timeAt", timeAt);
+                    ret.put("quality", quality);
+                    call.resolve(ret);
+                }
+            }
+            
+            @Override
+            public void onError(VideoRecorderError error) {
+                call.reject(error.code, error.message, error.details);
+            }
+        });
+    }
 
     // MARK: - Helper Methods
 

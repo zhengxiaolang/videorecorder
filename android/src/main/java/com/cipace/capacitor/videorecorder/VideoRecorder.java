@@ -99,6 +99,14 @@ public class VideoRecorder {
         }
     }
     
+    public static class ThumbnailResult {
+        public final String thumbnailPath;
+        
+        public ThumbnailResult(String thumbnailPath) {
+            this.thumbnailPath = thumbnailPath;
+        }
+    }
+    
     public interface RecordingCallback {
         void onSuccess(Object result);
         void onError(VideoRecorderError error);
@@ -251,6 +259,47 @@ public class VideoRecorder {
             callback.onSuccess(null);
         } catch (Exception e) {
             callback.onError(new VideoRecorderError(VideoRecorderError.STORAGE_ERROR, "Failed to delete recording: " + e.getMessage()));
+        }
+    }
+    
+    public static void generateThumbnail(String videoPath, double timeAt, double quality, RecordingCallback callback) {
+        try {
+            // 使用MediaMetadataRetriever生成缩略图
+            android.media.MediaMetadataRetriever retriever = new android.media.MediaMetadataRetriever();
+            retriever.setDataSource(videoPath);
+            
+            // 获取视频时长
+            String durationStr = retriever.extractMetadata(android.media.MediaMetadataRetriever.METADATA_KEY_DURATION);
+            long duration = Long.parseLong(durationStr);
+            
+            // 确保时间点不超过视频时长
+            long actualTimeAt = Math.min(Math.max((long)(timeAt * 1000), 0), duration - 100); // 转换为毫秒
+            
+            // 生成缩略图
+            android.graphics.Bitmap bitmap = retriever.getFrameAtTime(actualTimeAt * 1000, android.media.MediaMetadataRetriever.OPTION_CLOSEST_SYNC);
+            retriever.release();
+            
+            if (bitmap == null) {
+                callback.onError(new VideoRecorderError("THUMBNAIL_GENERATION_FAILED", "Failed to extract frame from video"));
+                return;
+            }
+            
+            // 生成缩略图文件路径
+            File videoFile = new File(videoPath);
+            String fileName = videoFile.getName().replace(".mp4", "_thumbnail_" + (int)timeAt + "s.jpg");
+            File thumbnailFile = new File(videoFile.getParent(), fileName);
+            
+            // 保存缩略图
+            java.io.FileOutputStream out = new java.io.FileOutputStream(thumbnailFile);
+            bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, (int)(quality * 100), out);
+            out.flush();
+            out.close();
+            bitmap.recycle();
+            
+            callback.onSuccess(new ThumbnailResult(thumbnailFile.getAbsolutePath()));
+            
+        } catch (Exception e) {
+            callback.onError(new VideoRecorderError("THUMBNAIL_GENERATION_FAILED", "Failed to generate thumbnail: " + e.getMessage()));
         }
     }
     
