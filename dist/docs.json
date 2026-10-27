@@ -82,7 +82,7 @@
             "text": "Promise<StopRecordingResult> 录制完成后的结果"
           }
         ],
-        "docs": "打开视频录制界面 - 扩展功能\n注意：此方法会打开原生录制界面，等待用户完成录制操作后才返回最终结果",
+        "docs": "打开视频录制界面 - 扩展功能\r\n注意：此方法会打开原生录制界面，等待用户完成录制操作后才返回最终结果",
         "complexTypes": [
           "StopRecordingResult",
           "StartRecordingOptions"

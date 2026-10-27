@@ -1,6 +1,6 @@
 # Cap Video Recorder
 
-🎥 **A FREE Capacitor 7 plugin for video recording**
+🎥 **A FREE Capacitor 8+ plugin for video recording**
 
 A simple and powerful Capacitor plugin for video and audio recording on iOS and Android platforms.
 
